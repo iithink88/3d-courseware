@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 课件展示 — 中考集训地 Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #0f172a; color: #e2e8f0; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; background: #1e293b; border-bottom: 1px solid #334155;
+    flex-wrap: wrap; gap: 12px;
+  }
+  header h1 { font-size: 20px; color: #f8fafc; }
+  header h1 span { color: #38bdf8; }
+  .links a {
+    display: inline-block; padding: 6px 14px; margin-left: 8px;
+    background: #2563eb; color: #fff; text-decoration: none;
+    border-radius: 6px; font-size: 13px; transition: background .2s;
+  }
+  .links a:hover { background: #1d4ed8; }
+  .bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 24px; background: #162032; font-size: 13px;
+    border-bottom: 1px solid #1e293b; color: #94a3b8; flex-wrap: wrap;
+  }
+  .bar kbd {
+    display: inline-block; padding: 1px 6px; background: #0f172a;
+    border: 1px solid #475569; border-radius: 4px; font-family: monospace; font-size: 12px;
+  }
+  #frame-wrap { position: relative; width: 100%; height: calc(100vh - 110px); }
+  #demo-frame {
+    width: 100%; height: 100%; border: none; display: block;
+    background: #000;
+  }
+  .fullscreen-btn {
+    position: absolute; top: 10px; right: 10px; z-index: 10;
+    padding: 6px 14px; background: rgba(37,99,235,.85); color: #fff;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
+    backdrop-filter: blur(4px); transition: background .2s;
+  }
+  .fullscreen-btn:hover { background: rgba(37,99,235,1); }
+  @media (max-width: 600px) {
+    header h1 { font-size: 16px; }
+    .bar { font-size: 11px; padding: 8px 12px; }
+    #frame-wrap { height: calc(100vh - 130px); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎓 <span>3D 课件展示</span> — 中考集训地 Demo</h1>
+  <div class="links">
+    <a href="https://github.com/iithink88/3d-courseware" target="_blank">GitHub</a>
+    <a id="dl-link" download>⬇ 下载单文件</a>
+  </div>
+</header>
+
+<div class="bar">
+  <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span>
+  <span>鼠标拖拽转视角</span>
+  <span>走近牌子按 <kbd>E</kbd> 或点击进入学习</span>
+  <span>手机：左摇杆移动 + 右半屏转视角</span>
+</div>
+
+<div id="frame-wrap">
+  <button class="fullscreen-btn" onclick="toggleFS()">⛶ 全屏演示</button>
+  <iframe id="demo-frame"
+          src="demo/%E4%B8%AD%E8%80%83%E9%9B%86%E8%AE%AD%E5%9C%B0-%E5%8D%95%E6%96%87%E4%BB%B6.html"
+          allow="autoplay; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals">
+  </iframe>
+</div>
+
+<script>
+function toggleFS() {
+  var el = document.getElementById('demo-frame');
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+// 下载链接指向 demo 文件
+document.getElementById('dl-link').href =
+  'demo/' + encodeURIComponent('中考集训地-单文件.html');
+</script>
+
+</body>
+</html>
