@@ -30,6 +30,8 @@ Word / Excel / PPT），按 `E` 或点击进入，弹出**分小节内容面板*
 点「▶ 生成 3D 课件」产出站点、「🌐 预览」本地看、「📁 打开文件夹」取走。
 首次可点「载入示例」看完整的「中考集训地」五模块范例。
 
+![图形界面截图](assets/gui-screenshot.png)
+
 ### 方式 B：写 JSON（适合批量 / 进阶）
 照 `templates/courseware.example.json` 改一份你的课件 JSON，然后：
 ```bash
@@ -53,8 +55,12 @@ python scripts/pack_singlefile.py --src ./我的课件 --out 我的课件-单文
 
 ## 四、示例 Demo（直接体验）
 
-`demo/中考集训地-单文件.html` 是一个**做好的成品**：用最新版 Chrome / Edge
-双击即可漫步学习「中考集训地」（Windows / 网络 / Word / Excel / PPT 五大模块）。
+👉 **[点击这里直接在网页上操作演示「中考集训地」3D 课件](https://iithink88.github.io/3d-courseware/)**
+
+> 用最新版 **Chrome / Edge** 打开，操控披风小猫漫步广场，走近发光牌子按 `E` 或点击进入学习（Windows / 网络 / Word / Excel / PPT 五大模块）。
+> 操作：`WASD` 移动、鼠标拖拽转视角、手机有虚拟摇杆。
+
+`demo/中考集训地-单文件.html` 是该 Demo 的**单文件成品**（1.36 MB，双击即跑，可下载离线使用）。
 制作过程见 `demo/README.md`。
 
 ---
