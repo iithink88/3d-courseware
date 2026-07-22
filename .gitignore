@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# 本地生成产物（按需）
+_3d_home_test/
+_course_test/
+_course_fresh/
+*.zip
+
+# 系统
+.DS_Store
+Thumbs.db
