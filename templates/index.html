@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>__TITLE__</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #cfe8ff;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; color: #2b2b2b; }
+  body { opacity: 0; transition: opacity .8s ease; }
+  body.ready { opacity: 1; }
+
+  #app { position: fixed; inset: 0; }
+  #app canvas { display: block; touch-action: none; }
+
+  /* 3D 中的浮动标签 */
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .label { position: absolute; transform: translate(-50%, -50%);
+    background: rgba(255,255,255,.85); color: #333; font-size: 13px; font-weight: 600;
+    padding: 3px 9px; border-radius: 12px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    border: 1px solid rgba(0,0,0,.06); }
+
+  /* 底部提示 / 互动按钮 */
+  #hint { position: fixed; left: 50%; bottom: 86px; transform: translateX(-50%);
+    background: rgba(0,0,0,.62); color: #fff; padding: 8px 16px; border-radius: 20px;
+    font-size: 14px; z-index: 20; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #interact-btn { position: fixed; right: 18px; bottom: 96px; z-index: 25; display: none;
+    width: 64px; height: 64px; border-radius: 50%; border: none; background: #ff8c42; color: #fff;
+    font-size: 14px; font-weight: 700; box-shadow: 0 4px 14px rgba(255,140,66,.5); }
+
+  /* 向导气泡 */
+  #guide-bubble { position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%);
+    background: #fff; color: #333; padding: 10px 16px; border-radius: 14px; font-size: 14px;
+    z-index: 22; display: none; max-width: 80vw; box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    border: 2px solid #ffd1e3; }
+
+  /* 虚拟摇杆 */
+  #joystick-base { position: fixed; z-index: 30; width: 100px; height: 100px; left: 24px; bottom: 24px;
+    border-radius: 50%; background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.5);
+    touch-action: none; display: none; }
+  body.touch #joystick-base { display: block; }
+  #joystick-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px;
+    border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+  #bgm-btn { position: fixed; right: 14px; top: 14px; z-index: 30; display: none;
+    border: none; background: rgba(0,0,0,.5); color: #fff; padding: 8px 12px; border-radius: 14px;
+    font-size: 13px; cursor: pointer; }
+
+  /* 开场欢迎层 */
+  #welcome { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    background: linear-gradient(160deg, #a9e0ff 0%, #d8ecff 55%, #ffe9c7 100%); transition: opacity .6s; }
+  #welcome.hide { opacity: 0; pointer-events: none; }
+  #welcome h1 { font-size: clamp(28px, 6vw, 52px); margin: 0 0 8px; color: #234; }
+  #welcome .sub { font-size: clamp(15px, 3vw, 20px); color: #456; margin: 0 0 18px; }
+  #welcome .intro { font-size: 15px; color: #345; max-width: 560px; line-height: 1.7; margin: 0 0 26px; }
+  #welcome .start { border: none; background: #ff8c42; color: #fff; font-size: 18px; font-weight: 700;
+    padding: 12px 38px; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 18px rgba(255,140,66,.5);
+    transition: transform .15s; }
+  #welcome .start:active { transform: scale(.96); }
+  #welcome .tips { margin-top: 22px; font-size: 13px; color: #567; line-height: 1.8; }
+
+  /* 内容面板 */
+  #panel { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column;
+    background: rgba(245,248,252,.98); backdrop-filter: blur(4px); }
+  #panel.open { display: flex; }
+  #panel-header { display: flex; align-items: center; gap: 14px; padding: 18px 22px;
+    border-bottom: 3px solid var(--mc, #4f8cff); background: #fff; }
+  #panel-icon { font-size: 38px; line-height: 1; }
+  #panel-header h2 { margin: 0; font-size: 22px; color: #234; }
+  #panel-header .sum { margin: 4px 0 0; font-size: 14px; color: #667; }
+  #panel-close { margin-left: auto; border: none; background: #eef1f5; color: #555; width: 40px; height: 40px;
+    border-radius: 50%; font-size: 18px; cursor: pointer; }
+  #panel-close:hover { background: #e2e6ec; }
+  #panel-main { flex: 1; display: flex; min-height: 0; }
+  #section-nav { width: 210px; flex-shrink: 0; overflow-y: auto; padding: 14px 10px; background: #f0f3f8;
+    border-right: 1px solid #e2e7ee; }
+  #section-nav .sec-item { display: block; width: 100%; text-align: left; border: none; background: transparent;
+    padding: 11px 14px; margin-bottom: 6px; border-radius: 10px; font-size: 14px; color: #445;
+    cursor: pointer; font-family: inherit; }
+  #section-nav .sec-item:hover { background: #e4e9f2; }
+  #section-nav .sec-item.active { background: var(--mc, #4f8cff); color: #fff; font-weight: 600; }
+  #section-body { flex: 1; overflow-y: auto; padding: 26px 32px; }
+  #section-body h3 { color: #234; font-size: 19px; margin: 0 0 14px; }
+  #section-body .content { font-size: 16px; line-height: 1.9; color: #334; white-space: pre-wrap;
+    word-break: break-word; }
+  #section-body .content b { color: #1a1a1a; }
+  #section-body .content code { background: #eef1f5; padding: 1px 6px; border-radius: 5px;
+    font-family: Consolas, "Courier New", monospace; color: #b5341f; }
+  #panel-foot { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 12px;
+    background: #fff; border-top: 1px solid #e2e7ee; }
+  #panel-foot button { border: none; background: #eef1f5; color: #445; padding: 9px 20px; border-radius: 20px;
+    font-size: 14px; cursor: pointer; font-family: inherit; }
+  #panel-foot button:hover:not(:disabled) { background: #e2e6ec; }
+  #panel-foot button:disabled { opacity: .4; cursor: default; }
+  #sec-indicator { font-size: 13px; color: #889; }
+
+  @media (max-width: 640px) {
+    #panel-main { flex-direction: column; }
+    #section-nav { width: 100%; display: flex; gap: 6px; overflow-x: auto; padding: 10px; border-right: none;
+      border-bottom: 1px solid #e2e7ee; }
+    #section-nav .sec-item { width: auto; white-space: nowrap; margin-bottom: 0; }
+    #section-body { padding: 18px 18px; }
+  }
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="labels"></div>
+
+  <div id="hint"></div>
+  <button id="interact-btn">查看</button>
+  <div id="guide-bubble"></div>
+  <button id="bgm-btn">🎵 音乐</button>
+
+  <div id="joystick-base"><div id="joystick-knob"></div></div>
+
+  <!-- 开场欢迎层 -->
+  <div id="welcome">
+    <h1 id="w-title">__TITLE__</h1>
+    <p class="sub" id="w-sub">__SUBTITLE__</p>
+    <p class="intro" id="w-intro">__INTRO__</p>
+    <button class="start" id="w-start">开始探索 →</button>
+    <div class="tips">
+      电脑：WASD / 方向键 移动 · 鼠标拖拽 转视角 · 走近牌子按 E 或 点击查看<br/>
+      手机：左下半屏摇杆移动 · 右半屏拖拽转视角 · 点击牌子查看
+    </div>
+  </div>
+
+  <!-- 内容面板 -->
+  <div id="panel">
+    <div id="panel-header">
+      <span id="panel-icon">📘</span>
+      <div>
+        <h2 id="panel-name">模块</h2>
+        <p class="sum" id="panel-summary"></p>
+      </div>
+      <button id="panel-close">✕</button>
+    </div>
+    <div id="panel-main">
+      <div id="section-nav"></div>
+      <div id="section-body"></div>
+    </div>
+    <div id="panel-foot">
+      <button id="prev-sec">← 上一节</button>
+      <span id="sec-indicator"></span>
+      <button id="next-sec">下一节 →</button>
+    </div>
+  </div>
+
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script type="module">
+    window.PROFILE = __PROFILE__;
+  </script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
